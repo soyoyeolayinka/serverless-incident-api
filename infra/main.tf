@@ -15,7 +15,10 @@ resource "aws_dynamodb_table" "incidents" {
   name = "${var.project_name}-incidents"
   billing_mode = "PAY_PER_REQUEST"
   hash_key = "incident_id"
-  attribute { name = "incident_id" type = "S" }
+  attribute {
+    name = "incident_id"
+    type = "S"
+  }
   tags = var.tags
 }
 resource "aws_iam_role" "lambda" {
@@ -46,7 +49,10 @@ resource "aws_cloudwatch_log_group" "lambda" {
   retention_in_days = 7
   tags = var.tags
 }
-resource "aws_apigatewayv2_api" "api" { name = var.project_name protocol_type = "HTTP" }
+resource "aws_apigatewayv2_api" "api" {
+  name          = var.project_name
+  protocol_type = "HTTP"
+}
 resource "aws_apigatewayv2_integration" "lambda" {
   api_id = aws_apigatewayv2_api.api.id
   integration_type = "AWS_PROXY"
@@ -59,7 +65,11 @@ resource "aws_apigatewayv2_route" "routes" {
   route_key = each.value
   target = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
-resource "aws_apigatewayv2_stage" "default" { api_id = aws_apigatewayv2_api.api.id name = "$default" auto_deploy = true }
+resource "aws_apigatewayv2_stage" "default" {
+  api_id      = aws_apigatewayv2_api.api.id
+  name        = "$default"
+  auto_deploy = true
+}
 resource "aws_lambda_permission" "api" {
   statement_id = "AllowApiGateway"
   action = "lambda:InvokeFunction"
